@@ -4005,6 +4005,10 @@
                        (let [gmap (gensym "map__")
                              gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
                              defaults (:or b)]
+                         (when-not (and
+                                  (or (nil? defaults) (map? defaults))
+                                  (every? symbol? (keys defaults)))
+                           (throw (new Exception "The :or entry for map destructuring must be a map whose keys are symbols.")))
                          (loop [ret (-> bvec (conj gmap) (conj v)
                                         (conj gmap) (conj `(if (seq? ~gmap) (clojure.lang.PersistentHashMap/create (seq ~gmapseq)) ~gmap))
                                         ((fn [ret]
