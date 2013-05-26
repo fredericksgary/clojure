@@ -12,6 +12,7 @@
 
 package clojure.lang;
 
+import clojure.lang.PersistentVector.TransientVector;
 import java.io.Serializable;
 import java.util.*;
 
@@ -501,7 +502,7 @@ public static class RSeq extends ASeq implements IndexedSeq, Counted{
 	}
 }
 
-static class SubVector extends APersistentVector implements IObj{
+static class SubVector extends APersistentVector implements IObj, IEditableCollection {
 	public final IPersistentVector v;
 	public final int start;
 	public final int end;
@@ -569,5 +570,111 @@ static class SubVector extends APersistentVector implements IObj{
 	public IPersistentMap meta(){
 		return _meta;
 	}
+
+  public ITransientVector asTransient(){
+    return new TransientSubVector(this);
+  }
+}
+
+static final class TransientSubVector extends AFn implements ITransientVector, Counted{
+  // Can't use ITransientVector here since we need to call ensureEditable.
+  final TransientVector v;
+  int start;
+  int end;
+
+  TransientSubVector(TransientVector v, int start, int end){
+    this.v = v;
+    this.start = start;
+    this.end = end;
+  }
+
+  TransientSubVector(SubVector v){
+    this((TransientVector) ((IEditableCollection) v.v).asTransient(), v.start, v.end);
+  }
+
+  public int count(){
+    this.v.ensureEditable();
+    return end - start;
+  }
+
+  public IPersistentVector persistent(){
+    // relies on ensureEditable in v
+    return new SubVector(null, v.persistent(), start, end);
+  }
+
+  public TransientSubVector conj(Object val){
+    // relies on ensureEditable in v
+    if(end == v.count()){
+      v.conj(val);
+    } else {
+      v.assocN(end, val);
+    }
+    end++;
+    return this;
+  }
+
+  public Object valAt(Object key){
+    // relies on ensureEditable in 2 arity version
+    return valAt(key, null);
+  }
+
+  public Object valAt(Object key, Object notFound){
+    // relies on ensureEditable in nth
+		if(Util.isInteger(key))
+			{
+			int i = ((Number) key).intValue();
+			if(i >= 0 && i < (end - start))
+				return nth(i);
+			}
+		return notFound;
+  }
+
+  public Object invoke(Object arg1) {
+    // relies on ensureEditable in nth
+		if(Util.isInteger(arg1))
+			return nth(((Number) arg1).intValue());
+		throw new IllegalArgumentException("Key must be integer");
+  }
+
+  public Object nth(int i){
+    // relies on ensureEditable in v
+    if((start + i >= end) || (i < 0))
+      throw new IndexOutOfBoundsException();
+    return this.v.nth(start + i);
+  }
+
+  public Object nth(int i, Object notFound){
+    // relies on ensureEditable in nth
+    if(i >= 0 && i < (end - start))
+      return nth(i);
+    return notFound;
+  }
+
+  public TransientSubVector assocN(int i, Object val){
+    // relies on ensureEditable in v
+    if(start + i > end)
+      throw new IndexOutOfBoundsException();
+    this.v.assocN(start + i, val);
+    if(i == (end - start)) end++;
+    return this;
+  }
+
+	public TransientSubVector assoc(Object key, Object val){
+    // relies on ensureEditable in assocN
+		if(Util.isInteger(key))
+			{
+			int i = ((Number) key).intValue();
+			return assocN(i, val);
+			}
+		throw new IllegalArgumentException("Key must be integer");
+	}
+
+  public TransientSubVector pop(){
+    this.v.ensureEditable();
+    if(0 == (end - start))
+      throw new IllegalStateException("Can't pop empty vector");
+    end--;
+    return this;
+  }
 }
 }

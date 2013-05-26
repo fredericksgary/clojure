@@ -31,3 +31,30 @@
 
 (deftest empty-transient
   (is (= false (.contains (transient #{}) :bogus-key))))
+
+(deftest subvec-transient
+  (testing "basic operations work"
+    (is (= [2 3 42]
+           (-> (range 10)
+               (vec)
+               (subvec 2 5)
+               (transient)
+               (pop!)
+               (conj! 42)
+               (persistent!)))))
+  (testing "pop throws on empty vector"
+    (is (thrown? IllegalStateException
+                 (-> (range 10)
+                     (vec)
+                     (subvec 3 5)
+                     (transient)
+                     (pop!)
+                     (pop!)
+                     (pop!)))))
+  (testing "thread-local access enforcement"
+    (let [v @(future (-> (range 99)
+                         (vec)
+                         (subvec 78 90)
+                         (transient)))]
+      (is (thrown? IllegalAccessError
+                   (nth v 3))))))
