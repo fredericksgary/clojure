@@ -10,6 +10,17 @@
 
 (set! *warn-on-reflection* true)
 
+(defn stupid-reduce
+  "Does a naive seq reduction without checking for chunkiness or
+   anything."
+  [s f val]
+  (if-let [s (seq s)]
+    (let [ret (f val (first s))]
+      (if (reduced? ret)
+        @ret
+        (recur (next s) f ret)))
+    val))
+
 (defprotocol CollReduce
   "Protocol for collection types that can implement reduce faster than
   first/next recursion. Called by clojure.core/reduce. Baseline
@@ -101,7 +112,7 @@
            (recur (chunk-next s)
                   f
                   ret)))
-       (internal-reduce s f val))
+       (stupid-reduce s f val))
      val))
  
   clojure.lang.StringSeq
