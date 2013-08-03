@@ -442,6 +442,7 @@
   {:added "1.1"}
   [msg form]
   `(let [value# ~form]
+     (prn (list 'assert-any (boolean value#)))
      (if value#
        (do-report {:type :pass, :message ~msg,
                 :expected '~form, :actual value#})
@@ -735,6 +736,7 @@
         ;; Otherwise, just test every var in the namespace.
         (test-all-vars ns-obj))
       (do-report {:type :end-test-ns, :ns ns-obj}))
+    (prn "RETURNING" @*report-counters*)
     @*report-counters*))
 
 
