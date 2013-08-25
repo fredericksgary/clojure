@@ -78,6 +78,13 @@
            (reduce #(and %1 %2) all-true)
            (reduce #(and %1 %2) true all-true)))))
 
+;; CLJ-1237 regression test
+(deftest reduce-with-alternating-chunked-unchunked
+  (is (= 1000000
+         (->> (repeat 500000 (cons 1 [1]))
+              (apply concat)
+              (reduce +)))))
+
 (deftest test-equality
   ; lazy sequences
   (are [x y] (= x y)
