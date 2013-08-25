@@ -18,17 +18,36 @@
 
 (defprotocol InternalReduce
   "Protocol for concrete seq types that can reduce themselves
-   faster than first/next recursion. Called by clojure.core/reduce."
+   faster than first/next recursion. Called by clojure.core/reduce.
+
+   Composite seqs that want to change implementations should return
+   an instance of Unreduced with the unreduced tail (presumably of
+   a different type) and the current reduction value."
   (internal-reduce [seq f start]))
+
+;; Unreduced is a special flag type that is only used as the return
+;; value from internal-reduce to signal an implementation change; coll
+;; is the remainder of the sequence that hasn't yet been reduced, and
+;; x is the current value in the reduction. See seq-reduce.
+(deftype Unreduced [^clojure.lang.ISeq coll x])
 
 (defn- seq-reduce
   ([coll f]
      (if-let [s (seq coll)]
-       (internal-reduce (next s) f (first s))
+       (loop [x (first s)
+              coll (next s)]
+         (let [x' (internal-reduce coll f x)]
+           (if (instance? Unreduced x')
+             (recur (.x ^Unreduced x') (.coll ^Unreduced x'))
+             x')))
        (f)))
   ([coll f val]
-     (let [s (seq coll)]
-       (internal-reduce s f val))))
+     (loop [x val
+            coll (seq coll)]
+       (let [x' (internal-reduce coll f x)]
+         (if (instance? Unreduced x')
+           (recur (.x ^Unreduced x') (.coll ^Unreduced x'))
+           x')))))
 
 (extend-protocol CollReduce
   nil
@@ -101,7 +120,7 @@
            (recur (chunk-next s)
                   f
                   ret)))
-       (internal-reduce s f val))
+       (Unreduced. s val))
      val))
  
   clojure.lang.StringSeq
@@ -144,7 +163,7 @@
                 (if (reduced? ret)
                   @ret
                   (recur cls (next s) f ret)))
-         (internal-reduce s f val))
+         (Unreduced. s val))
        val))))
 
 (def arr-impl
