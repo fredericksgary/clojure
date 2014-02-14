@@ -3547,8 +3547,19 @@
 (defn aget
   "Returns the value at the index/indices. Works on Java arrays of all
   types."
-  {:inline (fn [a i] `(. clojure.lang.RT (aget ~a (int ~i))))
-   :inline-arities #{2}
+  {:inline (fn
+             ([a i]
+                `(. clojure.lang.RT (aget ~a (int ~i))))
+             ([a idx & idxs]
+                (let [stripped-tag (if-let [s (-> a meta :tag)]
+                                     (if (and (string? s)
+                                              (= \[ (first s)))
+                                       (.substring ^String s 1)))
+                      first-call `(aget ~a ~idx)
+                      first-call' (if stripped-tag
+                                    (vary-meta first-call assoc :tag stripped-tag)
+                                    first-call)]
+                  `(aget ~first-call' ~@idxs))))
    :added "1.0"}
   ([array idx]
    (clojure.lang.Reflector/prepRet (.getComponentType (class array)) (. Array (get array idx))))
