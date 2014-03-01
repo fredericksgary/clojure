@@ -600,7 +600,16 @@
                (hinted [_ ^int i] (inc i))
                (hinted [_ ^String s] (str s s)))]
         (is (= 2 (.hinted r 1)))
-        (is (= "xoxo" (.hinted r "xo")))))))
+        (is (= "xoxo" (.hinted r "xo"))))))
+  (testing "metadata"
+    (testing "that IObj works"
+      (let [r (reify)]
+        (is (= {::foo 12}
+               (-> r (with-meta {::foo 12}) (meta))))))
+    (testing "that form metadata is present"
+      (let [r ^::bar (reify)]
+        (is (= true
+               (-> r (meta) (get ::bar))))))))
 
 
 ; see CLJ-845
