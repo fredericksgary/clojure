@@ -3170,8 +3170,9 @@
   (.persistent coll))
 
 (defn conj!
-  "Adds x to the transient collection, and return coll. The 'addition'
-  may happen at different 'places' depending on the concrete type."
+  "Adds x to the transient collection, and returns an updated
+  collection. The 'addition' may happen at different 'places'
+  depending on the concrete type."
   {:added "1.1"
    :static true}
   ([] (transient []))
@@ -3182,7 +3183,8 @@
 (defn assoc!
   "When applied to a transient map, adds mapping of key(s) to
   val(s). When applied to a transient vector, sets the val at index.
-  Note - index must be <= (count vector). Returns coll."
+  Note - index must be <= (count vector). Returns an updated
+  collection."
   {:added "1.1"
    :static true}
   ([^clojure.lang.ITransientAssociative coll key val] (.assoc coll key val))
@@ -3204,8 +3206,8 @@
        ret))))
 
 (defn pop!
-  "Removes the last item from a transient vector. If
-  the collection is empty, throws an exception. Returns coll"
+  "Removes the last item from a transient vector. If the collection is
+  empty, throws an exception. Returns an updated collection."
   {:added "1.1"
    :static true}
   [^clojure.lang.ITransientVector coll] 
