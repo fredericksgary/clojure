@@ -5940,7 +5940,11 @@
   [coll] (instance? clojure.lang.Sorted coll))
 
 (defn counted?
- "Returns true if coll implements count in constant time"
+ "Returns true if coll implements count in constant time. Note
+  that this function only checks if coll implements the Counted
+  interface, and there are some collections, such as Arrays and
+  Strings, which will return from count in constant time but will
+  return false from this function."
  {:added "1.0"
    :static true}
   [coll] (instance? clojure.lang.Counted coll))
