@@ -52,6 +52,19 @@
              (recur ret)))
          ret)))))
 
+(defn- naive-seq-reduce
+  "Reduces a seq, ignoring any opportunities to switch to a more
+  specialized implementation."
+  [s f val]
+  (loop [s (seq s)
+         val val]
+    (if s
+      (let [ret (f val (first s))]
+        (if (reduced? ret)
+          @ret
+          (recur (next s) ret)))
+      val)))
+
 (extend-protocol CollReduce
   nil
   (coll-reduce
@@ -119,7 +132,9 @@
            (recur (chunk-next s)
                   f
                   ret)))
-       (coll-reduce s f val))
+       ;; degrade to naive reduce so we don't use up too much stack
+       ;; space transitioning between reduce impls
+       (naive-seq-reduce s f val))
      val))
  
   clojure.lang.StringSeq
@@ -137,20 +152,8 @@
   
   java.lang.Object
   (internal-reduce
-   [s f val]
-   (loop [cls (class s)
-          s s
-          f f
-          val val]
-     (if-let [s (seq s)]
-       ;; roll over to faster implementation if underlying seq changes type
-       (if (identical? (class s) cls)
-         (let [ret (f val (first s))]
-                (if (reduced? ret)
-                  @ret
-                  (recur cls (next s) f ret)))
-         (coll-reduce s f val))
-       val))))
+    [s f val]
+    (naive-seq-reduce s f val)))
 
 (defprotocol IKVReduce
   "Protocol for concrete associative types that can reduce themselves
