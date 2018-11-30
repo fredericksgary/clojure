@@ -23,7 +23,7 @@ import java.lang.ref.SoftReference;
 
 public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
-static ConcurrentHashMap<String, Reference<Class>>classCache =
+public static ConcurrentHashMap<String, Reference<Class>>classCache =
         new ConcurrentHashMap<String, Reference<Class> >();
 
 static final URL[] EMPTY_URLS = new URL[]{};
