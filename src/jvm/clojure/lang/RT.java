@@ -468,7 +468,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 			scriptbase.contains("_") ? " Please check that namespaces with dashes use underscores in the Clojure file name." : ""));
 }
 
-static boolean isLogging = false;
+public static boolean isLogging = false;
 
 public static void log(String s){
   if(isLogging){
