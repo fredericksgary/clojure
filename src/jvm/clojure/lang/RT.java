@@ -467,8 +467,18 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 			scriptbase.contains("_") ? " Please check that namespaces with dashes use underscores in the Clojure file name." : ""));
 }
 
+static boolean isLogging = false;
+
+static void log(String s){
+  if(isLogging){
+    var("clojure.core","spit").invoke("/tmp/clojure.log",s + "\n",Keyword.intern("append"),T);
+  }
+}
+
 static void doInit() throws ClassNotFoundException, IOException{
 	load("clojure/core");
+
+  isLogging = true;
 
 	Var.pushThreadBindings(
 			RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
