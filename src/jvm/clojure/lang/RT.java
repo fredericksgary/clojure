@@ -442,6 +442,10 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 	}
 	boolean loaded = false;
 
+  if(classURL != null){
+    log("decisions: " + lastModified(classURL, classfile) + ", " + lastModified(cljURL, scriptfile));
+  }
+
 	if((classURL != null &&
 	    (cljURL == null
 	     || lastModified(classURL, classfile) > lastModified(cljURL, scriptfile)))
