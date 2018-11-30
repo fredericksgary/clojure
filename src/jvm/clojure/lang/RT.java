@@ -429,6 +429,7 @@ static public void load(String scriptbase) throws IOException, ClassNotFoundExce
 }
 
 static public void load(String scriptbase, boolean failIfNotFound) throws IOException, ClassNotFoundException{
+  log("RT.load: " + scriptbase);
 	String classfile = scriptbase + LOADER_SUFFIX + ".class";
 	String cljfile = scriptbase + ".clj";
 	String cljcfile = scriptbase + ".cljc";
@@ -2231,6 +2232,7 @@ static public Class classForNameNonLoading(String name) {
 }
 
 static public Class loadClassForName(String name) {
+  log("RT.loadClassForName: " + name);
 	try
 		{
 		classForNameNonLoading(name);

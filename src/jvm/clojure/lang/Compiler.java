@@ -7132,6 +7132,7 @@ public static Object eval(Object form) {
 }
 
 public static Object eval(Object form, boolean freshLoader) {
+  RT.log("Compiler.eval: " + form.toString());
 	boolean createdLoader = false;
 	if(true)//!LOADER.isBound())
 		{
@@ -7163,6 +7164,7 @@ public static Object eval(Object form, boolean freshLoader) {
 				ISeq s = RT.next(form);
 				for(; RT.next(s) != null; s = RT.next(s))
 					eval(RT.first(s), false);
+        RT.log("Compiler.eval-1");
 				return eval(RT.first(s), false);
 				}
 			else if((form instanceof IType) ||
@@ -7172,11 +7174,13 @@ public static Object eval(Object form, boolean freshLoader) {
 				{
 				ObjExpr fexpr = (ObjExpr) analyze(C.EXPRESSION, RT.list(FN, PersistentVector.EMPTY, form),
 													"eval" + RT.nextID());
+        RT.log("Compiler.eval-2");
 				IFn fn = (IFn) fexpr.eval();
 				return fn.invoke();
 				}
 			else
 				{
+        RT.log("Compiler.eval-3");
 				Expr expr = analyze(C.EVAL, form);
 				return expr.eval();
 				}
@@ -7598,6 +7602,7 @@ private static Object readerOpts(String sourceName) {
 }
 
 public static Object load(Reader rdr, String sourcePath, String sourceName) {
+  RT.log("Compiler.load");
 	Object EOF = new Object();
 	Object ret = null;
 	LineNumberingPushbackReader pushbackReader =
@@ -7737,6 +7742,7 @@ static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) {
 }
 
 public static Object compile(Reader rdr, String sourcePath, String sourceName) throws IOException{
+  RT.log("Compiler.compile");
 	if(COMPILE_PATH.deref() == null)
 		throw Util.runtimeException("*compile-path* not set");
 
