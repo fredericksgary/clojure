@@ -469,7 +469,7 @@ static public void load(String scriptbase, boolean failIfNotFound) throws IOExce
 
 static boolean isLogging = false;
 
-static void log(String s){
+public static void log(String s){
   if(isLogging){
     var("clojure.core","spit").invoke("/tmp/clojure.log",s + "\n",Keyword.intern("append"),T);
   }

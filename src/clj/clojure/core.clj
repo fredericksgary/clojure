@@ -6068,6 +6068,7 @@
   {:added "1.0"}
 
   [& args]
+  (clojure.lang.RT/log (str "require:" (apply str args)))
   (apply load-libs :require args))
 
 (defn async-require
@@ -6113,6 +6114,7 @@ fails, attempts to require sym's namespace and retries."
   {:redef true
    :added "1.0"}
   [& paths]
+  (clojure.lang.RT/log (str "load:" (apply str paths)))
   (doseq [^String path paths]
     (let [^String path (if (.startsWith path "/")
                           path
