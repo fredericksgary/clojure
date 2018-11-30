@@ -25,6 +25,8 @@ public class DynamicClassLoader extends URLClassLoader{
 HashMap<Integer, Object[]> constantVals = new HashMap<Integer, Object[]>();
 public static ConcurrentHashMap<String, Reference<Class>>classCache =
         new ConcurrentHashMap<String, Reference<Class> >();
+public static ConcurrentHashMap<String, byte[]>binaryCache =
+        new ConcurrentHashMap<String, byte[] >();
 
 static final URL[] EMPTY_URLS = new URL[]{};
 
@@ -45,6 +47,7 @@ public Class defineClass(String name, byte[] bytes, Object srcForm){
 	Util.clearCache(rq, classCache);
 	Class c = defineClass(name, bytes, 0, bytes.length);
     classCache.put(name, new SoftReference(c,rq));
+    binaryCache.put(name, bytes);
     return c;
 }
 
