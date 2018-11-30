@@ -479,8 +479,6 @@ public static void log(String s){
 static void doInit() throws ClassNotFoundException, IOException{
 	load("clojure/core");
 
-  isLogging = true;
-
 	Var.pushThreadBindings(
 			RT.mapUniqueKeys(CURRENT_NS, CURRENT_NS.deref(),
 			       WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()

@@ -33,6 +33,7 @@ public static void legacy_script(String[] args) {
 }
 
 public static void main(String[] args) {
+    clojure.lang.RT.isLogging = true;
     REQUIRE.invoke(CLOJURE_MAIN);
     MAIN.applyTo(RT.seq(args));
 }
